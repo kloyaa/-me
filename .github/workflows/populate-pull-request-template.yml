@@ -1,0 +1,40 @@
+name: Populate Pull Request Template
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  populate_template:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Get cherry-picked commit titles
+      run: |
+        CHERRY_PICKED_COMMITS=$(git log --pretty=format:"%s" --grep="cherry picked from commit" -5)
+        echo "CHERRY_PICKED_COMMIT_TITLES=$CHERRY_PICKED_COMMITS" >> $GITHUB_ENV
+    - name: Create pull request
+      uses: peter-evans/create-pull-request@v3
+      with:
+        title: Your pull request title
+        commit-message: Your commit message
+        branch: Your branch name
+        body: |
+          ## Description
+
+          Please describe the changes in this pull request.
+
+          ## Cherry-pick Details
+
+          Please list the cherry-picked commits below:
+
+          ${{ env.CHERRY_PICKED_COMMIT_TITLES }}
+
+          ## Checklist
+
+          Please check all that apply:
+
+          - [ ] I have updated the documentation to reflect these changes.
+          - [ ] I have tested these changes locally and they work as expected.
+          - [ ] This pull request does not contain any unrelated code changes.
+          - [ ] I have updated the version number and release notes (if applicable).
